@@ -16,6 +16,7 @@ func WithHostRouteOption(host string) RouteOption {
 	}
 }
 
+// Chainer：通用封装
 type Chainer interface {
 	Route(ctx context.Context, network, address string, opts ...RouteOption) Route
 }

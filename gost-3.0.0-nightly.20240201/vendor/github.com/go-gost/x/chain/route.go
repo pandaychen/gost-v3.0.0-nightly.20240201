@@ -25,6 +25,7 @@ func ChainRouteOption(c chain.Chainer) RouteOption {
 	}
 }
 
+// route 是x/core/ Router的实例化
 type route struct {
 	nodes   []*chain.Node
 	options RouteOptions
@@ -47,8 +48,10 @@ func (r *route) addNode(nodes ...*chain.Node) {
 	r.nodes = append(r.nodes, nodes...)
 }
 
+// route的Dial方法（包含多个hops场景）
 func (r *route) Dial(ctx context.Context, network, address string, opts ...chain.DialOption) (net.Conn, error) {
 	if len(r.Nodes()) == 0 {
+		//
 		return chain.DefaultRoute.Dial(ctx, network, address, opts...)
 	}
 
@@ -106,8 +109,10 @@ func (r *route) Bind(ctx context.Context, network, address string, opts ...chain
 	return ln, nil
 }
 
+// connect：
 func (r *route) connect(ctx context.Context, logger logger.Logger) (conn net.Conn, err error) {
 	network := "ip"
+	// first node
 	node := r.nodes[0]
 
 	defer func() {
@@ -155,6 +160,7 @@ func (r *route) connect(ctx context.Context, logger logger.Logger) (conn net.Con
 		return
 	}
 
+	// 根据第0个节点的信息构建cn
 	cn, err := node.Options().Transport.Handshake(ctx, cc)
 	if err != nil {
 		cc.Close()
@@ -178,9 +184,14 @@ func (r *route) connect(ctx context.Context, logger logger.Logger) (conn net.Con
 		}
 	}
 
+	//上面的操作是先处理chain中的第0个节点，生成第一个初始连接cn
+
+	// 依次遍历第2/3....个节点
 	preNode := node
 	for _, node := range r.nodes[1:] {
 		marker := node.Marker()
+
+		//1.Resolve
 		addr, err = chain.Resolve(ctx, network, node.Addr, node.Options().Resolver, node.Options().HostMapper, logger)
 		if err != nil {
 			cn.Close()
@@ -189,6 +200,8 @@ func (r *route) connect(ctx context.Context, logger logger.Logger) (conn net.Con
 			}
 			return
 		}
+
+		// 2.connect()
 		cc, err = preNode.Options().Transport.Connect(ctx, cn, "tcp", addr)
 		if err != nil {
 			cn.Close()
@@ -197,6 +210,8 @@ func (r *route) connect(ctx context.Context, logger logger.Logger) (conn net.Con
 			}
 			return
 		}
+
+		//3. handshake
 		cc, err = node.Options().Transport.Handshake(ctx, cc)
 		if err != nil {
 			cn.Close()
@@ -209,6 +224,7 @@ func (r *route) connect(ctx context.Context, logger logger.Logger) (conn net.Con
 			marker.Reset()
 		}
 
+		// save it
 		cn = cc
 		preNode = node
 	}
@@ -224,6 +240,7 @@ func (r *route) getNode(index int) *chain.Node {
 	return r.nodes[index]
 }
 
+// 返回route包含的chain.Node数组
 func (r *route) Nodes() []*chain.Node {
 	if r != nil {
 		return r.nodes

@@ -85,10 +85,12 @@ func LoggerRouterOption(logger logger.Logger) RouterOption {
 	}
 }
 
+// Router：是Route的实例化，实现了Bind/Dial/Nodes方法
 type Router struct {
 	options RouterOptions
 }
 
+// 初始化router
 func NewRouter(opts ...RouterOption) *Router {
 	r := &Router{}
 	for _, opt := range opts {
@@ -164,6 +166,7 @@ func (r *Router) dial(ctx context.Context, network, address string) (conn net.Co
 
 		var route Route
 		if r.options.Chain != nil {
+			//构建最终的route结构，这个route里面包含了nodes   []*chain.Node结构，用于最终连接
 			route = r.options.Chain.Route(ctx, network, ipAddr, WithHostRouteOption(address))
 		}
 

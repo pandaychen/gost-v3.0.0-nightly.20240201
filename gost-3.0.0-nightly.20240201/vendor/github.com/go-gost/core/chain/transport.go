@@ -90,6 +90,7 @@ func (tr *Transport) Dial(ctx context.Context, addr string) (net.Conn, error) {
 	return tr.dialer.Dial(ctx, addr, opts...)
 }
 
+// Transport的握手实现：不一定所有的协议都需要handshake
 func (tr *Transport) Handshake(ctx context.Context, conn net.Conn) (net.Conn, error) {
 	var err error
 	if hs, ok := tr.dialer.(dialer.Handshaker); ok {

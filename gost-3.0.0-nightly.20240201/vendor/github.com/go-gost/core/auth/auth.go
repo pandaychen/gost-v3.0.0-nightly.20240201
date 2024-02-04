@@ -7,6 +7,7 @@ type Options struct{}
 type Option func(opts *Options)
 
 // Authenticator is an interface for user authentication.
+// 认证器：通用接口
 type Authenticator interface {
 	Authenticate(ctx context.Context, user, password string, opts ...Option) (id string, ok bool)
 }

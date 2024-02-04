@@ -115,6 +115,7 @@ func TLSNodeOption(tlsSettings *TLSNodeSettings) NodeOption {
 	}
 }
 
+// Node：实例化单个节点封装
 type Node struct {
 	Name    string
 	Addr    string

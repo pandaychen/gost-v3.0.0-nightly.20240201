@@ -32,6 +32,7 @@ import (
 	"github.com/go-gost/x/stats"
 )
 
+// ChainRouterOption：解析配置规则
 func ParseService(cfg *config.ServiceConfig) (service.Service, error) {
 	if cfg.Listener == nil {
 		cfg.Listener = &config.ListenerConfig{
@@ -213,6 +214,8 @@ func ParseService(cfg *config.ServiceConfig) (service.Service, error) {
 			chain.ChainRouterOption(chainGroup(cfg.Handler.Chain, cfg.Handler.ChainGroup)),
 		)
 	}
+
+	//根据chain，构建router
 	router := chain.NewRouter(routerOpts...)
 
 	var h handler.Handler

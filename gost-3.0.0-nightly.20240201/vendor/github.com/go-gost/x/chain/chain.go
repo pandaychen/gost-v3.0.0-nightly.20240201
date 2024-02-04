@@ -37,6 +37,7 @@ type chainNamer interface {
 	Name() string
 }
 
+// Chain的实例化实现：包含了多个Hop
 type Chain struct {
 	name     string
 	hops     []hop.Hop
@@ -79,6 +80,8 @@ func (c *Chain) Name() string {
 	return c.name
 }
 
+// interface Chain的Route方法
+// 根据c.hops构建rt
 func (c *Chain) Route(ctx context.Context, network, address string, opts ...chain.RouteOption) chain.Route {
 	if c == nil || len(c.hops) == 0 {
 		return nil
@@ -90,6 +93,8 @@ func (c *Chain) Route(ctx context.Context, network, address string, opts ...chai
 	}
 
 	rt := NewRoute(ChainRouteOption(c))
+
+	//根据host构建最终的rt结构 （nodes   []*chain.Node）
 	for _, h := range c.hops {
 		node := h.Select(ctx,
 			hop.NetworkSelectOption(network),

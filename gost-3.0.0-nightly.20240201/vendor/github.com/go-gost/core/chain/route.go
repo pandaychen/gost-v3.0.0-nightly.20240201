@@ -20,10 +20,11 @@ var (
 	DefaultRoute Route = &route{}
 )
 
+// Route：Chain的通用封装，定义了3个方法
 type Route interface {
 	Dial(ctx context.Context, network, address string, opts ...DialOption) (net.Conn, error)
 	Bind(ctx context.Context, network, address string, opts ...BindOption) (net.Listener, error)
-	Nodes() []*Node
+	Nodes() []*Node //返回当前的Node（按顺序）
 }
 
 // route is a Route without nodes.
