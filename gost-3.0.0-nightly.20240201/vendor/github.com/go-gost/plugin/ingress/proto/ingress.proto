@@ -1,0 +1,29 @@
+// protoc --go_out=. --go_opt=paths=source_relative \
+//	--go-grpc_out=. --go-grpc_opt=paths=source_relative \
+//	ingress.proto
+
+syntax = "proto3";
+package proto;
+option go_package = "github.com/go-gost/plugin/ingress/proto";
+
+message GetRuleRequest {
+	string host = 1;
+}
+
+message GetRuleReply {
+	string endpoint = 1;
+}
+
+message SetRuleRequest {
+	string host = 1;
+	string endpoint = 2;
+}
+
+message SetRuleReply {
+	bool ok = 1;
+}
+
+service Ingress {
+	rpc GetRule(GetRuleRequest) returns (GetRuleReply);
+	rpc SetRule(SetRuleRequest) returns (SetRuleReply);
+}
