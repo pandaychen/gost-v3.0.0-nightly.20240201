@@ -143,6 +143,8 @@ func buildService(cfg *config.Config) (services []service.Service) {
 			}
 		}
 	}
+
+	//Hops
 	for _, hopCfg := range cfg.Hops {
 		hop, err := hop_parser.ParseHop(hopCfg, log)
 		if err != nil {
@@ -154,6 +156,8 @@ func buildService(cfg *config.Config) (services []service.Service) {
 			}
 		}
 	}
+
+	//Chains
 	for _, chainCfg := range cfg.Chains {
 		c, err := chain_parser.ParseChain(chainCfg, log)
 		if err != nil {
@@ -166,6 +170,7 @@ func buildService(cfg *config.Config) (services []service.Service) {
 		}
 	}
 
+	//Services
 	for _, svcCfg := range cfg.Services {
 		svc, err := service_parser.ParseService(svcCfg)
 		if err != nil {

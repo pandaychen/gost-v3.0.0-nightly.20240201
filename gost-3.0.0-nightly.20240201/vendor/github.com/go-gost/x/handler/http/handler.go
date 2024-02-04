@@ -60,6 +60,7 @@ func (h *httpHandler) Init(md md.Metadata) error {
 		return err
 	}
 
+	// 初始化到下一条的router方法
 	h.router = h.options.Router
 	if h.router == nil {
 		h.router = chain.NewRouter(chain.LoggerRouterOption(h.options.Logger))
@@ -75,6 +76,7 @@ func (h *httpHandler) Init(md md.Metadata) error {
 	return nil
 }
 
+// http协议的原始处理方法
 func (h *httpHandler) Handle(ctx context.Context, conn net.Conn, opts ...handler.HandleOption) error {
 	defer conn.Close()
 
@@ -97,6 +99,7 @@ func (h *httpHandler) Handle(ctx context.Context, conn net.Conn, opts ...handler
 		return nil
 	}
 
+	//常用方法
 	req, err := http.ReadRequest(bufio.NewReader(conn))
 	if err != nil {
 		log.Error(err)
@@ -209,6 +212,7 @@ func (h *httpHandler) handleRequest(ctx context.Context, conn net.Conn, req *htt
 		ctx = ctxvalue.ContextWithHash(ctx, &ctxvalue.Hash{Source: addr})
 	}
 
+	//从当前http请求获取要连接的下一条路由信息，按照router方案进行连接
 	cc, err := h.router.Dial(ctx, network, addr)
 	if err != nil {
 		resp.StatusCode = http.StatusServiceUnavailable
@@ -242,6 +246,7 @@ func (h *httpHandler) handleRequest(ctx context.Context, conn net.Conn, req *htt
 		}
 	}
 
+	// 重新封装前置连接
 	rw := traffic_wrapper.WrapReadWriter(h.options.Limiter, conn,
 		traffic.NetworkOption(network),
 		traffic.AddrOption(addr),
@@ -258,11 +263,14 @@ func (h *httpHandler) handleRequest(ctx context.Context, conn net.Conn, req *htt
 
 	start := time.Now()
 	log.Infof("%s <-> %s", conn.RemoteAddr(), addr)
+
+	// 核心，pipe前后连接！
 	netpkg.Transport(rw, cc)
 	log.WithFields(map[string]any{
 		"duration": time.Since(start),
 	}).Infof("%s >-< %s", conn.RemoteAddr(), addr)
 
+	// 结束
 	return nil
 }
 

@@ -226,6 +226,7 @@ func (s *defaultService) Serve() error {
 				}()
 			}
 
+			// 这里调用各个协议的handler方法
 			if err := s.handler.Handle(ctx, conn); err != nil {
 				s.options.logger.Error(err)
 				if v := xmetrics.GetCounter(xmetrics.MetricServiceHandlerErrorsCounter,
